@@ -1,0 +1,106 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-sage-100 text-canopy-text antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+  }
+
+  ::selection {
+    @apply bg-lime-200 text-forest-950;
+  }
+
+  input, select, textarea {
+    @apply transition-shadow duration-150;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    @apply outline-none ring-2 ring-forest-200 border-forest-900;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-forest-50 rounded-2xl border border-sage-200 shadow-soft;
+    transition: border-color 0.2s;
+  }
+
+  .card:hover {
+    @apply border-sage-400;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold
+           bg-lime text-forest-950 rounded-full
+           transition-all duration-150;
+    min-height: 44px;
+  }
+  .btn-primary:hover {
+    filter: brightness(1.06);
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium
+           bg-white text-canopy-muted rounded-full border border-sage-200
+           hover:border-sage-400
+           transition-all duration-150;
+    min-height: 44px;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium
+           text-canopy-subtle rounded-full
+           hover:bg-canopy-highlight hover:text-forest-950
+           transition-colors duration-150;
+  }
+
+  .btn-dark {
+    @apply inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold
+           bg-forest-950 text-forest-100 rounded-full
+           hover:bg-forest-800
+           transition-all duration-150;
+    min-height: 44px;
+  }
+
+  .input-field {
+    @apply w-full px-3.5 py-2.5 bg-white border border-sage-200 rounded-xl text-sm
+           placeholder:text-canopy-faint
+           transition-all duration-150;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-canopy-muted mb-1.5;
+  }
+
+  .section-title {
+    @apply font-mono text-xs uppercase tracking-widest text-forest-900;
+  }
+
+  .pill {
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-2xs font-medium;
+  }
+
+  .page-header {
+    @apply mb-8;
+  }
+
+  .page-title {
+    @apply text-xl font-semibold text-canopy-text tracking-tight;
+    letter-spacing: -0.02em;
+  }
+
+  .page-subtitle {
+    @apply text-sm text-canopy-subtle mt-1;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}

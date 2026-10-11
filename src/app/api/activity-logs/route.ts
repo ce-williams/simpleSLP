@@ -10,7 +10,7 @@ export async function GET() {
       'SELECT * FROM activity_logs ORDER BY created_at DESC'
     ).all();
 
-    const enriched = logs.map((log: Record<string, unknown>) => {
+    const enriched = (logs as Record<string, unknown>[]).map((log) => {
       const entries = db.prepare(
         'SELECT * FROM activity_log_entries WHERE log_id = ? ORDER BY created_at ASC'
       ).all(log.id as string);

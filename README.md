@@ -1,4 +1,4 @@
-# DPOP — Dynamic Patient Outcomes Portal
+# SimpleSLP — Dynamic Patient Outcomes Portal
 
 A locally-runnable clinical workspace for speech-language pathologists, built around the loop: **case → goal → intervention → outcome → barrier → next decision**.
 

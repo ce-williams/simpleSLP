@@ -1,14 +1,7 @@
+import { getDb } from '@/lib/db/connection';
 import { NextRequest, NextResponse } from 'next/server';
-import Database from 'better-sqlite3';
-import path from 'path';
 import { getProvider } from '@/lib/ai';
 
-function getDb() {
-  const db = new Database(path.join(process.cwd(), 'data', 'dpop.db'));
-  db.pragma('journal_mode = WAL');
-  db.pragma('foreign_keys = ON');
-  return db;
-}
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

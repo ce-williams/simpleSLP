@@ -1,18 +1,11 @@
+import { getDb } from '@/lib/db/connection';
 import { NextRequest, NextResponse } from 'next/server';
-import Database from 'better-sqlite3';
 import { nanoid } from 'nanoid';
-import path from 'path';
 import { getProvider } from '@/lib/ai';
 import { TreatmentPlanOutputSchema } from '@/lib/ai/schemas';
 import { findSimilarCases } from '@/lib/matching/similar-cases';
 import { guardText } from '@/lib/pii/guard';
 
-function getDb() {
-  const db = new Database(path.join(process.cwd(), 'data', 'dpop.db'));
-  db.pragma('journal_mode = WAL');
-  db.pragma('foreign_keys = ON');
-  return db;
-}
 
 export async function POST(req: NextRequest) {
   const { caseId } = await req.json();

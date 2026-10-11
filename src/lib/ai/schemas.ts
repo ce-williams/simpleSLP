@@ -66,6 +66,43 @@ export const PatientSummaryOutputSchema = z.object({
   requires_clinician_review: z.literal(true),
 });
 
+export const PayerProgressReportOutputSchema = z.object({
+  report_type: z.literal('medicaid_progress_report'),
+  patient_identifier: z.string(),
+  reporting_period: z.object({ start: z.string(), end: z.string() }),
+  diagnoses: z.array(z.string()),
+  authorization_info: z.string(),
+  goals_progress: z.array(z.object({
+    goal_description: z.string(),
+    domain: z.string(),
+    baseline: z.string(),
+    current_level: z.string(),
+    target: z.string(),
+    progress_rating: z.enum(['significant_progress', 'moderate_progress', 'minimal_progress', 'regression', 'maintained']),
+    sessions_addressed: z.number(),
+    interventions_used: z.array(z.string()),
+    objective_data: z.string(),
+  })),
+  session_summary: z.object({
+    total_sessions: z.number(),
+    attended: z.number(),
+    cancelled: z.number(),
+    frequency: z.string(),
+    duration_minutes: z.number(),
+    setting: z.string(),
+  }),
+  barriers_to_progress: z.array(z.string()),
+  caregiver_involvement: z.string(),
+  medical_necessity_justification: z.string(),
+  continued_treatment_recommendation: z.string(),
+  plan_modifications: z.array(z.string()),
+  clinician_signature_line: z.string(),
+  knowledge_type: z.literal('ai_generated'),
+  requires_clinician_review: z.literal(true),
+});
+
+export type PayerProgressReportOutput = z.infer<typeof PayerProgressReportOutputSchema>;
+
 export type TreatmentPlanOutput = z.infer<typeof TreatmentPlanOutputSchema>;
 export type ActivityOutput = z.infer<typeof ActivityOutputSchema>;
 export type ProgressNoteOutput = z.infer<typeof ProgressNoteOutputSchema>;

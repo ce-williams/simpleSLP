@@ -44,6 +44,7 @@ export default function RootLayout({
                 <a href="/cases" className="px-4 py-2 text-sm text-canopy-faint rounded-full hover:bg-white/[0.08] hover:text-forest-100 transition-colors">Patients</a>
                 <a href="/resources" className="px-4 py-2 text-sm text-canopy-faint rounded-full hover:bg-white/[0.08] hover:text-forest-100 transition-colors">Resources</a>
                 <a href="/activities" className="px-4 py-2 text-sm text-canopy-faint rounded-full hover:bg-white/[0.08] hover:text-forest-100 transition-colors">Activities</a>
+                <a href="/insights" className="px-4 py-2 text-sm text-canopy-faint rounded-full hover:bg-white/[0.08] hover:text-forest-100 transition-colors">Insights</a>
               </div>
               <MobileNav />
             </nav>

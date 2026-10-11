@@ -25,6 +25,7 @@ export function MobileNav() {
           <a href="/cases" className="block px-3 py-2.5 text-sm text-canopy-faint hover:text-forest-100 transition-colors">Patients</a>
           <a href="/resources" className="block px-3 py-2.5 text-sm text-canopy-faint hover:text-forest-100 transition-colors">Resources</a>
           <a href="/activities" className="block px-3 py-2.5 text-sm text-canopy-faint hover:text-forest-100 transition-colors">Activities</a>
+          <a href="/insights" className="block px-3 py-2.5 text-sm text-canopy-faint hover:text-forest-100 transition-colors">Insights</a>
         </div>
       )}
     </div>

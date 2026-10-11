@@ -187,6 +187,10 @@ export default function CaseDetailPage() {
                 Generate Treatment Plan
               </a>
               <a href={`/activities?case=${caseId}`} className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-forest-100 rounded-full border border-forest-800 hover:bg-white/[0.08] transition-colors w-fit">Create Activity</a>
+              <button onClick={() => { window.open(`/portal/${caseId}`, '_blank'); }} className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-forest-100 rounded-full border border-forest-800 hover:bg-white/[0.08] transition-colors w-fit">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" /></svg>
+                Caregiver Portal
+              </button>
             </div>
           </div>
         </div>
@@ -774,9 +778,161 @@ function CoordinationTab({ caseId, entries, onRefresh }: { caseId: string; entri
   );
 }
 
+function PayerReportButton({ caseId }: { caseId: string }) {
+  const [report, setReport] = useState<Record<string, unknown> | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const generate = () => {
+    setLoading(true);
+    setError('');
+    fetch(`/api/cases/${caseId}/progress-report`)
+      .then(r => { if (!r.ok) throw new Error('Failed'); return r.json(); })
+      .then(d => { setReport(d); setLoading(false); })
+      .catch(e => { setError(e.message); setLoading(false); });
+  };
+
+  if (report) {
+    const r = report as {
+      patient_identifier: string;
+      reporting_period: { start: string; end: string };
+      diagnoses: string[];
+      authorization_info: string;
+      goals_progress: { goal_description: string; domain: string; baseline: string; current_level: string; target: string; progress_rating: string; sessions_addressed: number; interventions_used: string[]; objective_data: string }[];
+      session_summary: { total_sessions: number; attended: number; frequency: string; duration_minutes: number; setting: string };
+      barriers_to_progress: string[];
+      caregiver_involvement: string;
+      medical_necessity_justification: string;
+      continued_treatment_recommendation: string;
+      plan_modifications: string[];
+      clinician_signature_line: string;
+    };
+
+    const progressColors: Record<string, string> = {
+      significant_progress: 'bg-green-100 text-green-800',
+      moderate_progress: 'bg-lime-100 text-lime-800',
+      minimal_progress: 'bg-amber-100 text-amber-800',
+      maintained: 'bg-blue-100 text-blue-800',
+      regression: 'bg-red-100 text-red-800',
+    };
+
+    return (
+      <div className="card p-6 mb-6 print:shadow-none print:border print:border-gray-300">
+        <div className="flex items-center justify-between mb-4 no-print">
+          <h3 className="text-base font-semibold text-canopy-text">Medicaid Progress Report</h3>
+          <div className="flex gap-2">
+            <button onClick={() => window.print()} className="btn-secondary text-sm">Print / PDF</button>
+            <button onClick={() => setReport(null)} className="btn-ghost text-sm">Close</button>
+          </div>
+        </div>
+
+        <div className="space-y-5 text-sm">
+          <div className="grid grid-cols-2 gap-4">
+            <div><span className="text-2xs text-canopy-faint block mb-0.5">Patient</span><span className="font-medium">{r.patient_identifier}</span></div>
+            <div><span className="text-2xs text-canopy-faint block mb-0.5">Reporting Period</span><span className="font-medium">{r.reporting_period.start} — {r.reporting_period.end}</span></div>
+            <div><span className="text-2xs text-canopy-faint block mb-0.5">Diagnoses</span><span className="font-medium">{r.diagnoses.join(', ')}</span></div>
+            <div><span className="text-2xs text-canopy-faint block mb-0.5">Authorization</span><span className="font-medium">{r.authorization_info}</span></div>
+          </div>
+
+          <div>
+            <h4 className="section-title mb-3">Goal Progress</h4>
+            <div className="space-y-3">
+              {r.goals_progress.map((g, i) => (
+                <div key={i} className="bg-forest-50 rounded-xl p-4 border border-sage-200">
+                  <div className="flex items-start justify-between mb-2">
+                    <p className="font-medium text-canopy-text pr-3">{g.goal_description}</p>
+                    <span className={`pill shrink-0 ${progressColors[g.progress_rating] || 'bg-sage-100 text-canopy-subtle'}`}>
+                      {g.progress_rating.replace(/_/g, ' ')}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-3 text-2xs mb-2">
+                    <div><span className="text-canopy-faint">Baseline:</span> {g.baseline}</div>
+                    <div><span className="text-canopy-faint">Current:</span> {g.current_level}</div>
+                    <div><span className="text-canopy-faint">Target:</span> {g.target}</div>
+                  </div>
+                  <p className="text-2xs text-canopy-subtle">{g.objective_data}</p>
+                  {g.interventions_used.length > 0 && (
+                    <p className="text-2xs text-canopy-faint mt-1">Interventions: {g.interventions_used.join(', ')}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <h4 className="section-title mb-2">Session Summary</h4>
+              <p>{r.session_summary.attended} of {r.session_summary.total_sessions} sessions attended</p>
+              <p className="text-2xs text-canopy-faint">{r.session_summary.frequency} · {r.session_summary.duration_minutes} min · {r.session_summary.setting}</p>
+            </div>
+            <div>
+              <h4 className="section-title mb-2">Caregiver Involvement</h4>
+              <p>{r.caregiver_involvement}</p>
+            </div>
+          </div>
+
+          {r.barriers_to_progress.length > 0 && (
+            <div>
+              <h4 className="section-title mb-2">Barriers to Progress</h4>
+              <ul className="space-y-1">{r.barriers_to_progress.map((b, i) => <li key={i} className="text-canopy-subtle">• {b}</li>)}</ul>
+            </div>
+          )}
+
+          <div>
+            <h4 className="section-title mb-2">Medical Necessity</h4>
+            <p className="text-canopy-muted">{r.medical_necessity_justification}</p>
+          </div>
+
+          <div>
+            <h4 className="section-title mb-2">Recommendation</h4>
+            <p className="text-canopy-muted">{r.continued_treatment_recommendation}</p>
+          </div>
+
+          {r.plan_modifications.length > 0 && (
+            <div>
+              <h4 className="section-title mb-2">Recommended Modifications</h4>
+              <ul className="space-y-1">{r.plan_modifications.map((m, i) => <li key={i} className="text-canopy-subtle">• {m}</li>)}</ul>
+            </div>
+          )}
+
+          <div className="border-t border-sage-200 pt-4 mt-4">
+            <pre className="text-sm text-canopy-muted whitespace-pre-wrap font-sans">{r.clinician_signature_line}</pre>
+          </div>
+
+          <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl p-3 text-2xs text-amber-800 no-print">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 mt-0.5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" /></svg>
+            AI-generated draft — requires clinician review before submission to payer.
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="card p-5 mb-6 bg-forest-950 text-forest-100">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="font-mono text-xs uppercase tracking-widest text-lime mb-1">Payer Reports</h3>
+          <p className="text-sm text-canopy-faint">Auto-generate Medicaid progress reports from session data</p>
+        </div>
+        <button onClick={generate} disabled={loading} className="btn-primary text-sm">
+          {loading ? (
+            <div className="w-4 h-4 border-2 border-forest-900/30 border-t-forest-900 rounded-full animate-spin" />
+          ) : (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" /></svg>
+          )}
+          Generate Report
+        </button>
+      </div>
+      {error && <p className="text-sm text-red-400 mt-2">{error}</p>}
+    </div>
+  );
+}
+
 function DocumentsTab({ caseId, documents }: { caseId: string; documents: DocumentRow[] }) {
   return (
     <div>
+      <PayerReportButton caseId={caseId} />
       <div className="flex justify-between items-center mb-5">
         <h2 className="text-base font-semibold text-canopy-text">Documents</h2>
         <a href={`/cases/${caseId}/plan`} className="btn-primary">

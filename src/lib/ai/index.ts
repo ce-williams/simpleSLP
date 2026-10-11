@@ -15,4 +15,4 @@ export function getProvider(): AIProvider {
 }
 
 export type { AIProvider } from './provider';
-export type { TreatmentPlanInput, ActivityInput, ProgressNoteInput, PatientSummaryInput } from './provider';
+export type { TreatmentPlanInput, ActivityInput, ProgressNoteInput, PatientSummaryInput, PayerProgressReportInput } from './provider';

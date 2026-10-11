@@ -1,5 +1,5 @@
-import type { AIProvider, TreatmentPlanInput, ActivityInput, ProgressNoteInput, PatientSummaryInput } from './provider';
-import type { TreatmentPlanOutput, ActivityOutput, ProgressNoteOutput, PatientSummaryOutput } from './schemas';
+import type { AIProvider, TreatmentPlanInput, ActivityInput, ProgressNoteInput, PatientSummaryInput, PayerProgressReportInput } from './provider';
+import type { TreatmentPlanOutput, ActivityOutput, ProgressNoteOutput, PatientSummaryOutput, PayerProgressReportOutput } from './schemas';
 
 export class MockProvider implements AIProvider {
   readonly name = 'mock_provider';
@@ -205,6 +205,85 @@ export class MockProvider implements AIProvider {
       sections,
       unsupported_content: [],
       knowledge_type: 'ai_generated',
+    };
+  }
+
+  async generatePayerProgressReport(input: PayerProgressReportInput): Promise<PayerProgressReportOutput> {
+    const caseData = input.caseData as Record<string, string>;
+    const diagnoses = JSON.parse(caseData.diagnoses || '[]') as string[];
+    const caregiverInfo = input.caregiverParticipation || {};
+
+    const sessionDates = input.sessions.map(s => s.session_date as string).sort();
+    const periodStart = sessionDates[0] || new Date().toISOString().slice(0, 10);
+    const periodEnd = sessionDates[sessionDates.length - 1] || new Date().toISOString().slice(0, 10);
+
+    const goalProgress = input.goals.map((g: Record<string, unknown>) => {
+      const goalOutcomes = input.outcomes.filter(o => o.goal_id === g.id);
+      const goalInterventions = input.interventions.filter(i => i.goal_id === g.id);
+      const goalSessions = new Set(goalInterventions.map(i => i.session_id as string));
+
+      let currentLevel = 'No data recorded';
+      let progressRating: PayerProgressReportOutput['goals_progress'][0]['progress_rating'] = 'minimal_progress';
+
+      if (goalOutcomes.length >= 2) {
+        const first = parseFloat(goalOutcomes[0].value as string);
+        const last = parseFloat(goalOutcomes[goalOutcomes.length - 1].value as string);
+        if (!isNaN(first) && !isNaN(last)) {
+          const diff = last - first;
+          if (diff > 20) progressRating = 'significant_progress';
+          else if (diff > 5) progressRating = 'moderate_progress';
+          else if (diff < -5) progressRating = 'regression';
+          else if (Math.abs(diff) <= 5) progressRating = 'maintained';
+        }
+        currentLevel = `${goalOutcomes[goalOutcomes.length - 1].value} ${goalOutcomes[goalOutcomes.length - 1].unit || ''}`.trim();
+      } else if (goalOutcomes.length === 1) {
+        currentLevel = `${goalOutcomes[0].value} ${goalOutcomes[0].unit || ''}`.trim();
+      }
+
+      return {
+        goal_description: g.description as string,
+        domain: g.domain as string,
+        baseline: g.baseline_value ? `${g.baseline_value} ${g.baseline_unit || ''}`.trim() : 'Not established',
+        current_level: currentLevel,
+        target: g.target_value ? `${g.target_value} ${g.target_unit || ''}`.trim() : 'Not specified',
+        progress_rating: progressRating,
+        sessions_addressed: goalSessions.size,
+        interventions_used: goalInterventions.map(i => i.name as string),
+        objective_data: goalOutcomes.length > 0
+          ? `${goalOutcomes.length} measurement(s) recorded. Latest: ${currentLevel}.`
+          : 'No objective data recorded for this reporting period.',
+      };
+    });
+
+    const unresolvedBarriers = input.barriers.filter((b: Record<string, unknown>) => !b.resolution);
+
+    return {
+      report_type: 'medicaid_progress_report',
+      patient_identifier: caseData.display_name || `Patient ${input.caseId.slice(0, 8)}`,
+      reporting_period: { start: periodStart, end: periodEnd },
+      diagnoses,
+      authorization_info: `Authorized for ${caseData.session_length_minutes || 30}-minute sessions in ${(caseData.setting || '').replace(/_/g, ' ')} setting.`,
+      goals_progress: goalProgress,
+      session_summary: {
+        total_sessions: input.sessions.length,
+        attended: input.sessions.length,
+        cancelled: 0,
+        frequency: input.episodes.length > 0 ? (input.episodes[0].frequency as string || '2x/week') : '2x/week',
+        duration_minutes: parseInt(caseData.session_length_minutes || '30'),
+        setting: (caseData.setting || '').replace(/_/g, ' '),
+      },
+      barriers_to_progress: unresolvedBarriers.map((b: Record<string, unknown>) => `[${b.category}] ${b.description}`),
+      caregiver_involvement: (caregiverInfo as Record<string, unknown>).present_mode
+        ? `Caregiver participates ${(caregiverInfo as Record<string, unknown>).present_mode}. Session attendance rate: ${(caregiverInfo as Record<string, unknown>).session_attendance_rate || 'not tracked'}.`
+        : 'Caregiver involvement not documented.',
+      medical_necessity_justification: `Patient presents with ${diagnoses.join(', ')} requiring continued skilled speech-language pathology services. ${goalProgress.length} goal(s) documented, with progress being tracked. Documented progress indicates potential for continued functional improvement with ongoing treatment.`,
+      continued_treatment_recommendation: `Continue ${(caseData.setting || '').replace(/_/g, ' ')} speech-language pathology services at current frequency and duration. ${unresolvedBarriers.length > 0 ? `${unresolvedBarriers.length} barrier(s) to progress have been identified and are being addressed.` : 'No significant barriers to continued progress.'}`,
+      plan_modifications: goalProgress
+        .filter(g => g.progress_rating === 'minimal_progress' || g.progress_rating === 'regression')
+        .map(g => `Consider modifying approach for ${g.domain} domain goal: "${g.goal_description.slice(0, 50)}..." — ${g.progress_rating.replace(/_/g, ' ')} noted.`),
+      clinician_signature_line: '________________________________\nLicensed Speech-Language Pathologist\nDate: _______________',
+      knowledge_type: 'ai_generated',
+      requires_clinician_review: true,
     };
   }
 

@@ -1,4 +1,4 @@
-import type { TreatmentPlanOutput, ActivityOutput, ProgressNoteOutput, PatientSummaryOutput } from './schemas';
+import type { TreatmentPlanOutput, ActivityOutput, ProgressNoteOutput, PatientSummaryOutput, PayerProgressReportOutput } from './schemas';
 
 export interface PatientSummaryInput {
   caseId: string;
@@ -42,10 +42,23 @@ export interface ProgressNoteInput {
   goals: Record<string, unknown>[];
 }
 
+export interface PayerProgressReportInput {
+  caseId: string;
+  caseData: Record<string, unknown>;
+  goals: Record<string, unknown>[];
+  sessions: Record<string, unknown>[];
+  outcomes: Record<string, unknown>[];
+  barriers: Record<string, unknown>[];
+  interventions: Record<string, unknown>[];
+  episodes: Record<string, unknown>[];
+  caregiverParticipation: Record<string, unknown> | null;
+}
+
 export interface AIProvider {
   readonly name: string;
   generateTreatmentPlan(input: TreatmentPlanInput): Promise<TreatmentPlanOutput>;
   generateActivity(input: ActivityInput): Promise<ActivityOutput>;
   generateProgressNote(input: ProgressNoteInput): Promise<ProgressNoteOutput>;
   generatePatientSummary(input: PatientSummaryInput): Promise<PatientSummaryOutput>;
+  generatePayerProgressReport(input: PayerProgressReportInput): Promise<PayerProgressReportOutput>;
 }

@@ -6,6 +6,7 @@ interface CaseRow {
   diagnoses: string;
   setting: string;
   precautions: string;
+  caregiver_participation: string;
 }
 
 interface GoalRow {
@@ -54,14 +55,14 @@ export function findSimilarCases(db: Database.Database, targetCaseId: string): M
     }
 
     const caseDiagnoses = new Set(JSON.parse(c.diagnoses || '[]') as string[]);
-    const sharedDiagnoses = [...targetDiagnoses].filter(d => caseDiagnoses.has(d));
+    const sharedDiagnoses = Array.from(targetDiagnoses).filter(d => caseDiagnoses.has(d));
     if (sharedDiagnoses.length > 0) {
       matchedFields.push('diagnoses');
     }
 
     const caseGoals = db.prepare('SELECT * FROM goals WHERE case_id = ? AND deleted_at IS NULL').all(c.id) as GoalRow[];
     const caseDomains = new Set(caseGoals.map(g => g.domain));
-    const matchedGoalDomains = [...targetDomains].filter(d => caseDomains.has(d));
+    const matchedGoalDomains = Array.from(targetDomains).filter(d => caseDomains.has(d));
     if (matchedGoalDomains.length > 0) {
       matchedFields.push('goal_domains');
     }

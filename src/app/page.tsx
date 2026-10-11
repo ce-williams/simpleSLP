@@ -1,7 +1,7 @@
 export default function Dashboard() {
   return (
     <div>
-      <section className="bg-forest-950 text-forest-100 rounded-3xl px-8 py-12 mb-10 overflow-hidden relative">
+      <section className="bg-forest-950 text-forest-100 rounded-2xl sm:rounded-3xl px-5 sm:px-8 py-8 sm:py-12 mb-8 sm:mb-10 overflow-hidden relative">
         <div className="relative max-w-[640px]">
           <span className="inline-block font-mono text-xs tracking-widest uppercase text-lime border border-lime/30 px-3 py-1.5 rounded-full mb-6">
             Clinical Workspace

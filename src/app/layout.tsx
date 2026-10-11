@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter, IBM_Plex_Mono } from 'next/font/google';
 import './globals.css';
+import { MobileNav } from '@/components/mobile-nav';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -30,7 +31,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <div className="min-h-screen flex flex-col">
           <header className="bg-forest-950 sticky top-0 z-50 no-print">
-            <nav className="flex items-center justify-between max-w-[1240px] mx-auto px-6 h-16">
+            <nav className="flex items-center justify-between max-w-[1240px] mx-auto px-4 sm:px-6 h-14 sm:h-16">
               <a href="/" className="flex items-center gap-2.5">
                 <span className="w-7 h-7 rounded-lg bg-lime flex items-center justify-center">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0C2B20" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
@@ -39,19 +40,20 @@ export default function RootLayout({
                 </span>
                 <span className="text-sm font-semibold text-forest-100 tracking-tight">SimpleSLP</span>
               </a>
-              <div className="flex items-center gap-1">
+              <div className="hidden sm:flex items-center gap-1">
                 <a href="/cases" className="px-4 py-2 text-sm text-canopy-faint rounded-full hover:bg-white/[0.08] hover:text-forest-100 transition-colors">Patients</a>
                 <a href="/resources" className="px-4 py-2 text-sm text-canopy-faint rounded-full hover:bg-white/[0.08] hover:text-forest-100 transition-colors">Resources</a>
                 <a href="/activities" className="px-4 py-2 text-sm text-canopy-faint rounded-full hover:bg-white/[0.08] hover:text-forest-100 transition-colors">Activities</a>
               </div>
+              <MobileNav />
             </nav>
           </header>
-          <main className="flex-1 max-w-[1240px] mx-auto w-full px-6 py-8">
+          <main className="flex-1 max-w-[1240px] mx-auto w-full px-4 sm:px-6 py-6 sm:py-8">
             {children}
           </main>
-          <footer className="border-t border-sage-200 bg-sage-100 py-6 px-6 no-print">
+          <footer className="border-t border-sage-200 bg-sage-100 py-4 sm:py-6 px-4 sm:px-6 no-print">
             <div className="max-w-[1240px] mx-auto">
-              <div className="flex items-start gap-3 bg-white/60 border border-sage-200 rounded-xl px-5 py-4">
+              <div className="flex items-start gap-2.5 sm:gap-3 bg-white/60 border border-sage-200 rounded-xl px-3.5 sm:px-5 py-3 sm:py-4">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-canopy-faint shrink-0 mt-0.5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
                 </svg>

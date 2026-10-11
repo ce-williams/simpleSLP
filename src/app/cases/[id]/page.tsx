@@ -95,20 +95,22 @@ export default function CaseDetailPage() {
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-sage-300"><path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" /></svg>
           <span className="text-2xs text-canopy-subtle">{caseData.display_name || `Patient ${caseData.id.slice(0, 8)}`}</span>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
           <h1 className="page-title">{caseData.display_name || 'Patient'} — Age {caseData.age_band}</h1>
-          <span className="pill bg-sage-100 text-canopy-subtle">{SETTING_LABELS[caseData.setting] || caseData.setting}</span>
-          <span className={`pill ${caseData.status === 'active' ? 'bg-canopy-highlight text-forest-900' : 'bg-sage-100 text-canopy-subtle'}`}>{caseData.status}</span>
+          <div className="flex items-center gap-2">
+            <span className="pill bg-sage-100 text-canopy-subtle">{SETTING_LABELS[caseData.setting] || caseData.setting}</span>
+            <span className={`pill ${caseData.status === 'active' ? 'bg-canopy-highlight text-forest-900' : 'bg-sage-100 text-canopy-subtle'}`}>{caseData.status}</span>
+          </div>
         </div>
       </div>
 
-      <div className="border-b border-sage-200 mb-6">
-        <nav className="flex gap-1">
+      <div className="border-b border-sage-200 mb-6 -mx-4 sm:mx-0 px-4 sm:px-0">
+        <nav className="flex gap-1 overflow-x-auto scrollbar-hide">
           {TABS.map((t) => (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
-              className={`px-4 py-2.5 text-sm font-medium rounded-t-xl transition-colors ${
+              className={`px-3 sm:px-4 py-2.5 text-sm font-medium rounded-t-xl transition-colors whitespace-nowrap ${
                 tab === t.key
                   ? 'text-forest-950 bg-white border border-sage-200 border-b-white -mb-px'
                   : 'text-canopy-faint hover:text-forest-900 hover:bg-canopy-highlight/50'
